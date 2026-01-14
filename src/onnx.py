@@ -1,6 +1,4 @@
-import os
 from pathlib import Path
-import onnxruntime as ort
 
 from .backends import OnnxBackend
 from .pipeline import BenchmarkPipeline

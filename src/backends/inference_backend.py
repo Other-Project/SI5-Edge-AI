@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 import cv2
+
 from ..helpers.yolo_api import Segment
 
 class InferenceBackend(ABC):
