@@ -5,10 +5,12 @@ import time
 import os
 import csv
 
-genai.configure(api_key="AIzaSyD1bOvgcsAVrwkrhoL1kaFAUNKTLDHlNUk")
+
+API_KEY=""
+genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemma-3-27b-it') 
 
-def extract_values_to_csv(video_path, output_file="resultats_mesures_oakd.csv"):
+def extract_values_to_csv(video_path, output_file):
     cap = cv2.VideoCapture(video_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
     
@@ -31,7 +33,9 @@ def extract_values_to_csv(video_path, output_file="resultats_mesures_oakd.csv"):
                 second = int(frame_count / fps)
 
                 frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-                frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+
+                if(video_path == "./video_oakd.mp4"):
+                    frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 frame_adj = cv2.convertScaleAbs(gray, alpha=1.5, beta=0)
@@ -61,4 +65,4 @@ def extract_values_to_csv(video_path, output_file="resultats_mesures_oakd.csv"):
     cap.release()
     print(f"Analyse terminée. Fichier prêt : {os.path.abspath(output_file)}")
 
-extract_values_to_csv("./video_oakd.mp4")
+extract_values_to_csv("./video_onnx.mp4","resultats_mesures_onnx.csv")
