@@ -1,5 +1,5 @@
 import cv2
-import google.generativeai as genai
+import google.genai as genai
 from PIL import Image
 import os
 import csv
@@ -10,8 +10,8 @@ OUTPUT_DIR = PROJECT_ROOT / "results" / "power_monitoring"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 API_KEY=""
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemma-3-27b-it') 
+client = genai.Client(api_key=API_KEY)
+model = 'gemma-3-27b-it' 
 
 def extract_values_to_csv(video_path, output_file):
     cap = cv2.VideoCapture(video_path)
@@ -48,7 +48,10 @@ def extract_values_to_csv(video_path, output_file):
                 prompt = "Analyze the screen. Give ONLY the two numbers separated by a comma (e.g., 5.21, 0.13). Do not add any letters."
                 
                 try:
-                    response = model.generate_content([prompt, pil_image])
+                    response = client.models.generate_content(
+                        model=model,
+                        contents=[prompt, pil_image]
+                    )
                     clean_res = response.text.strip().replace(' ', '')
                     
                     values = clean_res.split(',')
