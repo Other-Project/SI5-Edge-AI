@@ -41,6 +41,16 @@ def get_dataset_paths(dataset_key):
 
     return data_dir, labels_file
 
+def get_models_files(models_dir, suffix):
+    models_files = {}
+
+    for model_path in sorted(models_dir.iterdir()):
+        if model_path.suffix == suffix:
+            models_files[model_path.name] = model_path
+            print(f"🔹 Model found: {model_path.name}")
+            
+    return models_files
+
 def nms(boxes, scores, iou_threshold):
     # Sort by score
     sorted_indices = np.argsort(scores)[::-1]

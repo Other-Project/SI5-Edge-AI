@@ -34,18 +34,16 @@ class BenchmarkPipeline:
 
         self.images = [f for f in self.images if f in self.filename_to_id]
 
-    def bench(self, backend_class, models, output_dir, result_path = 'benchmark.csv', max_images=MAX_IMAGES, backend_kwargs=None):
+    def bench(self, backend_class, models, output_dir, output_file='benchmark.csv', max_images=MAX_IMAGES, backend_kwargs=None):
         if backend_kwargs is None:
             backend_kwargs = {}
             
-        self.result_path = result_path
         results = {}
-        model_list = list(models.items()) # On transforme en liste pour savoir si on est au dernier
         
-        for i, (model_name, model_path) in enumerate(model_list):
+        for i, (model_name, model_path) in enumerate(models.items()):
             try:
                 print(f"\n" + "="*50)
-                print(f"--- Benchmarking Model {i+1}/{len(model_list)}: {model_name} ---")
+                print(f"--- Benchmarking Model {i+1}/{len(models)}: {model_name} ---")
                 print("="*50)
 
                 backend = backend_class(model_path, **backend_kwargs)
@@ -53,14 +51,14 @@ class BenchmarkPipeline:
                 results[model_name] = stats
                 backend.close()
                 
-                print(f"\n[INFO] Benchmark completed for {model_name}.")
-                print("Waiting 10 seconds to let hardware cool down...")
+                print(f"\nBenchmark completed for {model_name}.")
+                print("Waiting 10 seconds...")
                 time.sleep(10)
 
             except Exception as e:
                 print(f"Error processing model {model_name}: {e}")
 
-        self.export_to_csv(results, output_dir)
+        self.export_to_csv(results, output_dir, output_file)
         return results
 
 
@@ -147,11 +145,11 @@ class BenchmarkPipeline:
 
         return stats
     
-    def export_to_csv(self, stats, output_dir):
+    def export_to_csv(self, stats, output_dir, output_file):
         if not stats:
             return
         
-        csv_path = os.path.join(output_dir, self.result_path)
+        csv_path = os.path.join(output_dir, output_file)
         first_model_stats = next(iter(stats.values()))
         
         fieldnames = ['Model'] + list(first_model_stats.keys())

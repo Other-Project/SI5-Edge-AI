@@ -1,10 +1,13 @@
 import cv2
 import google.generativeai as genai
 from PIL import Image
-import time
 import os
 import csv
+from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+OUTPUT_DIR = PROJECT_ROOT / "results" / "power_monitoring"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 API_KEY=""
 genai.configure(api_key=API_KEY)
@@ -20,7 +23,7 @@ def extract_values_to_csv(video_path, output_file):
     
     with open(output_file, mode='w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        writer.writerow(['Temps (s)', 'Tension (V)', 'Courant (A)', 'Watt (W)'])
+        writer.writerow(['time_s', 'voltage_v', 'current_a', 'power_watts'])
         
         print(f"Analysis in progress... Data will be saved in: {output_file}")
 
@@ -48,12 +51,12 @@ def extract_values_to_csv(video_path, output_file):
                     response = model.generate_content([prompt, pil_image])
                     clean_res = response.text.strip().replace(' ', '')
                     
-                    valeurs = clean_res.split(',')
+                    values = clean_res.split(',')
                     
-                    if len(valeurs) == 2:
-                        tension, courant = valeurs[0], valeurs[1]
-                        writer.writerow([second, tension, courant, float(tension)*float(courant)])
-                        print(f"[{second}s] Saved: {tension}V, {courant}A, {float(tension)*float(courant)}W")
+                    if len(values) == 2:
+                        voltage, current = values[0], values[1]
+                        writer.writerow([second, voltage, current, float(voltage)*float(current)])
+                        print(f"[{second}s] Saved: {voltage}V, {current}A, {float(voltage)*float(current)}W")
                     else:
                         print(f"[{second}s] Format error: {clean_res}")
                         
@@ -65,4 +68,4 @@ def extract_values_to_csv(video_path, output_file):
     cap.release()
     print(f"Analysis complete. File ready: {os.path.abspath(output_file)}")
 
-extract_values_to_csv("./video_onnx.mp4","resultats_mesures_onnx.csv")
+extract_values_to_csv("./video_onnx.mp4", str(OUTPUT_DIR / "rasp.csv"))

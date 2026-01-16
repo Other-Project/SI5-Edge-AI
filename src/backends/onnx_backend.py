@@ -2,7 +2,7 @@ import onnxruntime as ort
 import cv2
 import time
 import platform
-import multiprocessing
+
 from .inference_backend import InferenceBackend
 
 class OnnxBackend(InferenceBackend):
