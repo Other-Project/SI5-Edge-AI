@@ -2,7 +2,7 @@
     "input_width": 640,
     "input_height": 640,
     "shapes": {
-        "output0": [1, 116, 8400],
+        "output0": [1, 37, 8400],
         "output1": [1, 32, 160, 160]
     },
     "class_names": [
