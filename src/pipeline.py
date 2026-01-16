@@ -14,9 +14,8 @@ MAX_IMAGES = 100
 DATA_DIR, LABELS_FILE = get_dataset_paths("coco_person")
 
 class BenchmarkPipeline:
-    def __init__(self, data_path=DATA_DIR, result_path = 'benchmark.csv',labels_path=LABELS_FILE):
+    def __init__(self, data_path=DATA_DIR,labels_path=LABELS_FILE):
         self.data_path = data_path
-        self.result_path = result_path
         self.coco_gt = COCO(labels_path)
         
         self.person_cat_id = 1
@@ -35,10 +34,11 @@ class BenchmarkPipeline:
 
         self.images = [f for f in self.images if f in self.filename_to_id]
 
-    def bench(self, backend_class, models, output_dir, max_images=MAX_IMAGES, backend_kwargs=None):
+    def bench(self, backend_class, models, output_dir, result_path = 'benchmark.csv', max_images=MAX_IMAGES, backend_kwargs=None):
         if backend_kwargs is None:
             backend_kwargs = {}
             
+        self.result_path = result_path
         results = {}
         model_list = list(models.items()) # On transforme en liste pour savoir si on est au dernier
         
