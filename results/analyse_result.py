@@ -6,7 +6,6 @@ import os
 from matplotlib.lines import Line2D
 
 # 1. CONFIGURATION DES FICHIERS
-
 OUTPUT_DIR = './results/graph_results'
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -26,7 +25,6 @@ GLOBAL_BENCH_CONFIG = [
 ]
 
 # 2. FONCTIONS DE NETTOYAGE ET CALCUL
-
 def clean_model_name(name):
     """Nettoie le nom du modèle pour la légende."""
     name = str(name).replace('.onnx', '').replace('.blob', '')
@@ -42,7 +40,6 @@ def get_avg_power(df, phase_name):
     return subset[col].mean() if not subset.empty else 0
 
 # 3. GÉNÉRATION DES PROFILS INDIVIDUELS
-
 def generate_individual_profiles(config_dict):
     print("--- 1. Génération des profils individuels (Courbes & Moyennes) ---")
     
@@ -84,7 +81,7 @@ def generate_individual_profiles(config_dict):
             subset = df.iloc[s:e+1].copy()
             subset['Relative Time'] = np.arange(len(subset)) * time_step
             
-            label_c = clean_model_name(model) if 'clean_model_name' in globals() else model
+            label_c = clean_model_name(model)
             plt.plot(subset['Relative Time'], subset[col_conso], label=label_c)
             
             averages[label_c] = df.iloc[indices[0]:indices[-1]+1][col_conso].mean()
@@ -96,7 +93,6 @@ def generate_individual_profiles(config_dict):
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
         
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
         file_name_clean = custom_label.replace(' ', '_').replace('+', 'plus')
         plt.savefig(os.path.join(OUTPUT_DIR, f"courbes_{file_name_clean}.png"))
         plt.close()
@@ -122,7 +118,6 @@ def generate_individual_profiles(config_dict):
         print(f"Terminé pour {custom_label}")
 
 # 4. GÉNÉRATION DES COMPARAISONS GLOBALES
-
 def plot_efficiency(df, map_col, map_label, filename):
     plt.figure(figsize=(12, 8))
     sns.set_style("whitegrid")
@@ -143,9 +138,9 @@ def plot_efficiency(df, map_col, map_label, filename):
                 plt.scatter(pt[map_col], pt['Score'], color=colors[mod], marker=markers[dev], 
                             s=150, edgecolors='black', alpha=0.9, zorder=5)
 
-    plt.title(f"Efficacité : {map_label} vs Énergie consommée", fontsize=15)
+    plt.title(f"Efficacité : {map_label} vs Énergie Dynamique", fontsize=15)
     plt.xlabel(f"Précision ({map_label})", fontsize=12)
-    plt.ylabel("Énergie moyenne consommée (J)", fontsize=12)
+    plt.ylabel("Énergie consommée (J)", fontsize=12)
     plt.yscale('log')
 
     m_leg = [Line2D([0], [0], color=colors[m], lw=2, label=m) for m in models_list]
@@ -161,7 +156,7 @@ def plot_efficiency(df, map_col, map_label, filename):
     plt.close()
 
 def generate_global_comparisons(bench_config):
-    print("\n--- 2. Génération des comparaisons mAP / Efficacité ---")
+    print("\n--- 2. Génération des comparaisons mAP / Efficacité (Énergie Dynamique) ---")
     results = []
 
     for cfg in bench_config:
@@ -171,13 +166,17 @@ def generate_global_comparisons(bench_config):
             
         dfs_power = [pd.read_csv(pf) for pf in cfg['power_files'] if os.path.exists(pf)]
         if not dfs_power: continue
+
+        idle_p = sum(get_avg_power(df, 'Idle') for df in dfs_power)
         
         df_bench = pd.read_csv(cfg['bench'])
         for _, row in df_bench.iterrows():
-            model_p = sum(get_avg_power(df, row['Model']) for df in dfs_power)
+            total_model_p = sum(get_avg_power(df, row['Model']) for df in dfs_power)
             
-            if model_p > 0:
-                score = row['time_avg'] * model_p / 1000.0
+            if total_model_p > 0:
+                dynamic_p = max(0, total_model_p - idle_p)
+                
+                score = (row['time_avg'] * dynamic_p) / 1000.0
                 
                 results.append({
                     'Device': cfg['device'],
@@ -192,15 +191,11 @@ def generate_global_comparisons(bench_config):
         return
 
     df_final = pd.DataFrame(results)
-    
     plot_efficiency(df_final, 'mAP_box', 'mAP Box', 'comparaison_efficacite_box.png')
     plot_efficiency(df_final, 'mAP_mask', 'mAP Mask', 'comparaison_efficacite_mask.png')
-    
     print(f"Graphiques globaux sauvegardés dans : {OUTPUT_DIR}")
 
-
 # 5. EXÉCUTION
-
 if __name__ == "__main__":
     generate_individual_profiles(PROFILING_CONFIG)
     generate_global_comparisons(GLOBAL_BENCH_CONFIG)
