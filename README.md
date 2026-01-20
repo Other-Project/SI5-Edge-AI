@@ -40,28 +40,33 @@ across multiple hardware platforms:
 
 ```text
 SI5-Edge-AI/
+├── optimizations/
+│   ├── pruning/                # Model pruning tools (model_optimizer)
+│   │   └── model_optimizer/
+│   │       ├── blob_convertor.py   # ONNX -> BLOB conversion for OAK-D
+│   │       ├── calculate.py        # Optimization-related utilities
+│   │       ├── prune.py            # Model pruning
+│   │       └── ultralytics/        # Modified Ultralytics YOLO source
+│   │
+│   └── quantization/           # FP32 / FP16 / INT8 quantization
+│       └── quantization.py
 │
-├── model_optimizer/          # YOLO model optimization tools
-│   ├── blob_convertor.py     # ONNX → BLOB conversion for OAK-D
-│   ├── calculate.py          # Optimization-related utilities
-│   ├── prune.py              # Model pruning
-│   ├── quantization.py       # FP32 / FP16 / INT8 quantization
-│   └── ultralytics/          # Modified Ultralytics YOLO source
+├── models/                     # YOLOv11 models
+│   ├── yolo11n-seg.pt           # Base PyTorch model
+│   ├── onnx/                    # ONNX models (PC / Raspberry Pi)
+│   └── blob/                    # BLOB models (OAK-D)
 │
-├── models/                   # YOLOv11 models
-│   ├── yolo11n-seg.pt        # Base PyTorch model
-│   ├── onnx/                 # ONNX models (PC / Raspberry Pi)
-│   └── blob/                 # BLOB models (OAK-D)
+├── results/                    # Benchmark results
 │
-├── results/                  # Benchmark results
+├── src/                        # Main source code
+│   ├── pipeline.py             # COCO benchmark pipeline
+│   ├── onnx.py                 # ONNX Runtime benchmark
+│   ├── oak_d.py                # OAK-D benchmark
+│   ├── backends/               # Inference backends
+│   ├── helpers/                # Utilities, config, YOLO post-processing
+│   └── power_monitoring/       # Energy monitoring scripts
 │
-└── src/                      # Main source code
-    ├── pipeline.py           # COCO benchmark pipeline
-    ├── onnx.py               # ONNX Runtime benchmark
-    ├── oak_d.py              # OAK-D benchmark
-    ├── backends/             # Inference backends
-    ├── helpers/              # Utilities, config, YOLO post-processing
-    └── power_monitoring/     # Energy monitoring scripts
+└── README.md
 ```
 
 ---
