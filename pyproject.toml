@@ -14,6 +14,8 @@ dependencies = [
     "depthai==2.31.0.0",
     "onnxruntime>=1.23.2",
     "google-genai>=1.59.0",
+    "pandas>=2.3.3",
+    "seaborn>=0.13.2",
 ]
 
 [build-system]
