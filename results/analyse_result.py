@@ -137,6 +137,9 @@ def plot_efficiency(df, map_col, map_label, filename):
             if not pt.empty:
                 plt.scatter(pt[map_col], pt['Score'], color=colors[mod], marker=markers[dev], 
                             s=150, edgecolors='black', alpha=0.9, zorder=5)
+            if not df.empty:
+                x_limit = 0.75
+                plt.xlim(0, x_limit)
 
     plt.title(f"Efficacité : {map_label} vs Énergie Dynamique", fontsize=15)
     plt.xlabel(f"Précision ({map_label})", fontsize=12)
